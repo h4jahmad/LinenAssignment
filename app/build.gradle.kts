@@ -9,7 +9,6 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     kotlin("kapt")
-    id("com.google.dagger.hilt.android")
 }
 
 android {
@@ -31,10 +30,10 @@ android {
             // In a real world project, I'd create a `remote` or `common` module, and add
             // these endpoints configurations there. Instead of hardcoding, I'd also add the endpoint
             // to the `buildSrc` module.
-            buildConfigField("String", "BASE_URL", "\"https://rpc.ankr.com/\"")
+            buildConfigField("String", "BASE_URL", "\"https://rpc.ankr.com/eth/a66af53108aed2d05d04da594cb4008d9c16d3cd9e72c7d4d215d4a78d81e6f7\"")
         }
         release {
-            buildConfigField("String", "BASE_URL", "\"https://rpc.ankr.com/\"")
+            buildConfigField("String", "BASE_URL", "\"https://rpc.ankr.com/eth/a66af53108aed2d05d04da594cb4008d9c16d3cd9e72c7d4d215d4a78d81e6f7\"")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -64,7 +63,6 @@ kapt {
 }
 
 dependencies {
-    val hilt = "2.45"
     val coroutines = "1.6.4"
 
     implementation("androidx.core:core-ktx:1.9.0")
@@ -74,8 +72,6 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${coroutines}")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:${coroutines}")
-    implementation("com.google.dagger:hilt-android:${hilt}")
-    kapt("com.google.dagger:hilt-android-compiler:${hilt}")
     /**
      * In MavenCentral a list of vulnerabilities have been reported for this library's
      * dependencies, but I couldn't find any better replacement.
