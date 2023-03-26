@@ -18,5 +18,7 @@
 	<color name="color_on_error">#ffffff</color>
 	<color name="color_error_container">#ffdad6</color>
 	<color name="color_error_on_container">#410002</color>
+	<color name="color_surface_variant">#dbe4e6</color>
+	<color name="color_on_surface_variant">#3f484a</color>
 	<color name="color_accent">#00BEB3</color>
 </resources>

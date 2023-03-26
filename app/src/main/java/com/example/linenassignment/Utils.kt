@@ -3,6 +3,7 @@ package com.example.linenassignment
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.math.BigDecimal
+import java.math.BigInteger
 import java.text.DecimalFormat
 import java.util.*
 import java.util.concurrent.CompletableFuture
@@ -17,5 +18,5 @@ suspend fun <T> CompletableFuture<T>.await(): T = suspendCancellableCoroutine { 
     }
 }
 
-fun BigDecimal.formatEth(): String = DecimalFormat("#,###.00").format(this)
-
+fun BigDecimal.formatAmount(): String = DecimalFormat("#,##0.00").format(this)
+fun BigInteger.toBigDecimal(): BigDecimal = BigDecimal(this)

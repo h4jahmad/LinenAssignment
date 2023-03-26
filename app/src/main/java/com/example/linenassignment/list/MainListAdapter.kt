@@ -61,7 +61,7 @@ class MainListAdapter : ListAdapter<MainListItem, RecyclerView.ViewHolder>(
                 newItem: MainListItem,
             ): Boolean = when {
                 oldItem is Balance && newItem is Balance -> {
-                    oldItem.currency == newItem.currency
+                    oldItem.currencyCode == newItem.currencyCode
                 }
                 oldItem is Transaction && newItem is Transaction -> {
                     oldItem.id == newItem.id

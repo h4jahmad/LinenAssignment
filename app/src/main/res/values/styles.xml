@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+	<style name="Widget.App.CircularProgressIndicator" parent="Widget.MaterialComponents.CircularProgressIndicator">
+		<item name="materialThemeOverlay">@style/ThemeOverlay.App.CircularProgressIndicator</item>
+		<item name="android:indeterminate">true</item>
+		<item name="indicatorSize">@dimen/size_progress_indicator</item>
+	</style>
+
+	<style name="ThemeOverlay.App.CircularProgressIndicator" parent="">
+		<item name="colorPrimary">@color/color_accent</item>
+	</style>
+
+	<style name="Theme.LinenAssignment.Text.Title" parent="Theme.LinenAssignment">
+		<item name="android:textSize">@dimen/text_size_large</item>
+		<item name="android:textStyle">bold</item>
+	</style>
+
+	<style name="Theme.LinenAssignment.Text.Sub" parent="Theme.LinenAssignment">
+		<item name="android:textSize">@dimen/text_size_normal</item>
+		<item name="android:textStyle">bold</item>
+		<item name="android:textColor">@color/color_on_surface_variant</item>
+	</style>
+
+</resources>

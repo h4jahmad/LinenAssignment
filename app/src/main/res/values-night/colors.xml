@@ -18,6 +18,8 @@
 	<color name="color_on_error">#690005</color>
 	<color name="color_error_container">#93000a</color>
 	<color name="color_error_on_container">#ffdad6</color>
+	<color name="color_surface_variant">#3f484a</color>
+	<color name="color_on_surface_variant">#bfc8ca</color>
 	<color name="color_accent">#00BEB3</color>
 </resources>
 

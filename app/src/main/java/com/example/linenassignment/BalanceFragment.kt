@@ -24,7 +24,7 @@ class BalanceFragment : Fragment() {
     private val binding
         get() = _binding ?: throw IllegalStateException("_binding is not initialized.")
 
-    private val viewModel by viewModels<BalanceViewModel>()
+    private val viewModel by viewModels<BalanceViewModel> { BalanceViewModel.FACTORY }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -49,8 +49,8 @@ class BalanceFragment : Fragment() {
 
         collectWithLifecycle(viewModel.isLoading, collector = ::handleProgress)
 
-        collectWithLifecycle(viewModel.ethBalance) { balance ->
-            mainAdapter.submitList(listOf(balance))
+        collectWithLifecycle(viewModel.mainList) { list ->
+            mainAdapter.submitList(list)
         }
     }
 

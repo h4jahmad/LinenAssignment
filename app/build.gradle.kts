@@ -4,7 +4,6 @@
  * Not only dependencies, but also all the sdk version, build versions, namespace, version name
  * and version code, basically I'd remove any hardcode from build files except a few of them.
  * */
-
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -30,10 +29,10 @@ android {
             // In a real world project, I'd create a `remote` or `common` module, and add
             // these endpoints configurations there. Instead of hardcoding, I'd also add the endpoint
             // to the `buildSrc` module.
-            buildConfigField("String", "BASE_URL", "\"https://rpc.ankr.com/eth/a66af53108aed2d05d04da594cb4008d9c16d3cd9e72c7d4d215d4a78d81e6f7\"")
+            buildConfigField("String", "BASE_URL", "\"https://rpc.ankr.com/\"")
         }
         release {
-            buildConfigField("String", "BASE_URL", "\"https://rpc.ankr.com/eth/a66af53108aed2d05d04da594cb4008d9c16d3cd9e72c7d4d215d4a78d81e6f7\"")
+            buildConfigField("String", "BASE_URL", "\"https://rpc.ankr.com/\"")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -42,11 +41,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "1.8"
     }
     buildFeatures {
         viewBinding = true
@@ -78,7 +77,13 @@ dependencies {
      * https://mvnrepository.com/artifact/org.web3j/core/5.0.0
      * */
     implementation("org.web3j:core:5.0.0")
+    implementation("org.web3j:contracts:5.0.0")
+
     testImplementation("junit:junit:4.13.2")
+    testImplementation("com.google.truth:truth:1.1.3")
+    testImplementation("androidx.arch.core:core-testing:2.2.0")
+    testImplementation("io.mockk:mockk:1.13.4")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
 }

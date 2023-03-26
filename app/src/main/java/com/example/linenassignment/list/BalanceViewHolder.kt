@@ -1,9 +1,9 @@
 package com.example.linenassignment.list
 
 import androidx.recyclerview.widget.RecyclerView
+import com.example.linenassignment.R
 import com.example.linenassignment.databinding.ItemMainListBalanceBinding
 import com.example.linenassignment.list.MainListItem.Balance
-import java.util.*
 
 /**
  * Instead of inheriting directly from `RecyclerView.ViewHolder`, I'd create a `BaseViewHolder`
@@ -12,7 +12,11 @@ import java.util.*
 class BalanceViewHolder(private val binding: ItemMainListBalanceBinding) :
     RecyclerView.ViewHolder(binding.root) {
     fun bind(item: Balance): Unit = with(binding) {
-        itemMainListBalanceCurrencyLabel.text = item.currency
+        itemMainListBalanceTitle.text = String.format(
+            root.context.getString(R.string.all_asset_balance_label),
+            item.currencyName
+        )
+        itemMainListBalanceCurrencyLabel.text = item.currencyCode
         itemMainListBalanceAmountLabel.text = item.value
     }
 }
