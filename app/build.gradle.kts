@@ -29,10 +29,10 @@ android {
             // In a real world project, I'd create a `remote` or `common` module, and add
             // these endpoints configurations there. Instead of hardcoding, I'd also add the endpoint
             // to the `buildSrc` module.
-            buildConfigField("String", "BASE_URL", "\"https://rpc.ankr.com/\"")
+            buildConfigField("String", "BASE_URL", "\"https://rpc.ankr.com/eth/\"")
         }
         release {
-            buildConfigField("String", "BASE_URL", "\"https://rpc.ankr.com/\"")
+            buildConfigField("String", "BASE_URL", "\"https://rpc.ankr.com/eth/\"")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -68,11 +68,12 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("androidx.fragment:fragment-ktx:1.5.6")
     implementation("com.google.android.material:material:1.8.0")
+    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${coroutines}")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:${coroutines}")
     /**
-     * In MavenCentral a list of vulnerabilities have been reported for this library's
+     * In MavenCentral a list of vulnerabilities have been reported for these librarys'
      * dependencies, but I couldn't find any better replacement.
      * https://mvnrepository.com/artifact/org.web3j/core/5.0.0
      * */

@@ -1,18 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.swiperefreshlayout.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:id="@+id/balance_swipe_refresh"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent">
 
-	<androidx.recyclerview.widget.RecyclerView
-		android:id="@+id/main_list"
+	<FrameLayout
 		android:layout_width="match_parent"
-		android:layout_height="match_parent"
-		android:visibility="gone" />
+		android:layout_height="match_parent">
 
-	<com.google.android.material.progressindicator.CircularProgressIndicator
-		android:id="@+id/main_progress"
-		style="@style/Widget.App.CircularProgressIndicator"
-		android:layout_gravity="center"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content" />
-</FrameLayout>
+		<androidx.recyclerview.widget.RecyclerView
+			android:id="@+id/balance_list"
+			android:layout_width="match_parent"
+			android:layout_height="match_parent"
+			android:visibility="gone" />
+
+		<com.google.android.material.progressindicator.CircularProgressIndicator
+			android:id="@+id/balance_progress"
+			style="@style/Widget.App.CircularProgressIndicator"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_gravity="center" />
+	</FrameLayout>
+</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

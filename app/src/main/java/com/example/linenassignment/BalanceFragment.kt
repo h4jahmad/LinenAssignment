@@ -24,7 +24,7 @@ class BalanceFragment : Fragment() {
     private val binding
         get() = _binding ?: throw IllegalStateException("_binding is not initialized.")
 
-    private val viewModel by viewModels<BalanceViewModel> { BalanceViewModel.FACTORY }
+    private val viewModel: BalanceViewModel by viewModels { BalanceViewModel.FACTORY }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -41,22 +41,30 @@ class BalanceFragment : Fragment() {
 
     private fun FragmentBalanceBinding.initView() {
         val mainAdapter = MainListAdapter()
-        with(mainList) {
+        with(balanceList) {
             itemAnimator = DefaultItemAnimator()
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
             adapter = mainAdapter
         }
 
-        collectWithLifecycle(viewModel.isLoading, collector = ::handleProgress)
-
-        collectWithLifecycle(viewModel.mainList) { list ->
-            mainAdapter.submitList(list)
+        balanceSwipeRefresh.setOnRefreshListener {
+            viewModel.setShouldRefresh(
+                shouldRefresh = true,
+                isFirstTimeLoading = false
+            )
         }
+
+        collectWithLifecycle(viewModel.isLoading, collector = ::handleProgress)
+        collectWithLifecycle(viewModel.isRefreshing) { isRefreshing ->
+            if (!isRefreshing)
+                balanceSwipeRefresh.isRefreshing = false
+        }
+        collectWithLifecycle(viewModel.mainList, collector = mainAdapter::submitList)
     }
 
     private fun handleProgress(isLoading: Boolean) = with(binding) {
-        mainList.isVisible = !isLoading
-        mainProgress.isVisible = isLoading
+        balanceList.isVisible = !isLoading
+        balanceProgress.isVisible = isLoading
     }
 
     private inline fun <reified T> collectWithLifecycle(
