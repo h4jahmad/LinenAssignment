@@ -8,9 +8,9 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.linenassignment.R
 import com.example.linenassignment.databinding.ItemMainListBalanceBinding
+import com.example.linenassignment.databinding.ItemMainListSeparatorBinding
 import com.example.linenassignment.databinding.ItemMainListTransactionBinding
-import com.example.linenassignment.list.MainListItem.Balance
-import com.example.linenassignment.list.MainListItem.Transaction
+import com.example.linenassignment.list.MainListItem.*
 
 /**
  * It's better to create a BaseListAdapter to have some common functionalities so to avoid any
@@ -38,6 +38,13 @@ class MainListAdapter : ListAdapter<MainListItem, RecyclerView.ViewHolder>(
                 false
             )
         )
+        R.layout.item_main_list_separator -> SeparatorViewHolder(
+            ItemMainListSeparatorBinding.inflate(
+                LayoutInflater.from(parent.context),
+                parent,
+                false
+            )
+        )
         else -> throw IllegalArgumentException("Invalid view type.")
     }
 
@@ -47,11 +54,13 @@ class MainListAdapter : ListAdapter<MainListItem, RecyclerView.ViewHolder>(
     ): Unit = when (val item = getItem(position)) {
         is Balance -> (holder as BalanceViewHolder).bind(item)
         is Transaction -> (holder as TransactionViewHolder).bind(item)
+        is Separator -> (holder as SeparatorViewHolder).bind(item)
     }
 
     override fun getItemViewType(position: Int): Int = when (getItem(position)) {
         is Balance -> R.layout.item_main_list_balance
         is Transaction -> R.layout.item_main_list_transaction
+        is Separator -> R.layout.item_main_list_separator
     }
 
     companion object {

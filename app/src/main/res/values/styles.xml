@@ -11,15 +11,22 @@
 		<item name="colorPrimary">@color/color_accent</item>
 	</style>
 
+	<style name="Theme.LinenAssignment.List.Separator" parent="Theme.LinenAssignment">
+		<item name="android:textSize">@dimen/text_size_large</item>
+		<item name="android:textColor">@color/color_on_primary_container</item>
+	</style>
+
 	<style name="Theme.LinenAssignment.Text.Title" parent="Theme.LinenAssignment">
 		<item name="android:textSize">@dimen/text_size_large</item>
 		<item name="android:textStyle">bold</item>
+		<item name="android:textAllCaps">true</item>
 	</style>
 
 	<style name="Theme.LinenAssignment.Text.Sub" parent="Theme.LinenAssignment">
 		<item name="android:textSize">@dimen/text_size_normal</item>
 		<item name="android:textStyle">bold</item>
 		<item name="android:textColor">@color/color_on_surface_variant</item>
+		<item name="android:textAllCaps">true</item>
 	</style>
 
 	<style name="Theme.LinenAssignment.SwipeProgress" parent="Theme.LinenAssignment">
@@ -27,6 +34,11 @@
 		<item name="swipeRefreshLayoutProgressSpinnerBackgroundColor">
 			@color/color_secondary_container
 		</item>
+	</style>
+
+	<style name="Theme.LinenAssignment.Transaction.Card" parent="Theme.LinenAssignment">
+		<item name="cardElevation">2dp</item>
+		<item name="strokeWidth">0dp</item>
 	</style>
 
 </resources>

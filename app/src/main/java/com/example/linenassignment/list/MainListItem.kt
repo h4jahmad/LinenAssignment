@@ -1,5 +1,6 @@
 package com.example.linenassignment.list
 
+import androidx.annotation.StringRes
 
 sealed interface MainListItem {
     data class Balance(
@@ -7,6 +8,12 @@ sealed interface MainListItem {
         val currencyCode: String,
         val value: String
     ) : MainListItem
+
+    /** Instead of passing the resource Id directly and making the ViewModel
+     * dependent on the android resources, I'd use sealed classes, to let the
+     * ViewModel be testable inside the jvm test suit.
+     */
+    data class Separator(@StringRes val titleResId: Int) : MainListItem
 
     data class Transaction(val id: String) : MainListItem
 }

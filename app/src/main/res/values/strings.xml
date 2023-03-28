@@ -3,4 +3,7 @@
 	<string name="balance_fragment_label">Balance</string>
 	<string name="all_asset_balance_label">%1$s BALANCE:</string>
 	<string name="all_refresh_label">Refresh</string>
+	<string name="list_wallet_balance">Wallet Balance</string>
+	<string name="list_token_transactions">Latest Transactions</string>
+	<string name="all_string_title">DISMISS</string>
 </resources>
