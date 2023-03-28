@@ -5,22 +5,19 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.example.linenassignment.MainModule.getTokenContract
+import com.example.linenassignment.MainModule.provideTokenContract
 import com.example.linenassignment.list.MainListItem
 import com.example.linenassignment.list.MainListItem.Balance
-import com.example.linenassignment.model.Progress
-import io.reactivex.Flowable
+import com.example.linenassignment.list.MainListItem.Separator
+import io.reactivex.disposables.CompositeDisposable
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import org.bouncycastle.util.encoders.Base64
-import org.web3j.abi.EventValues
-import org.web3j.abi.FunctionReturnDecoder
 import org.web3j.abi.TypeReference
 import org.web3j.abi.datatypes.Address
 import org.web3j.abi.datatypes.Event
-import org.web3j.abi.datatypes.Uint
-import org.web3j.ens.contracts.generated.ENS.TransferEventResponse
+import org.web3j.abi.datatypes.generated.Uint256
 import org.web3j.protocol.Web3j
+import org.web3j.protocol.core.DefaultBlockParameter
 import org.web3j.protocol.core.DefaultBlockParameterName
 import org.web3j.protocol.core.methods.request.EthFilter
 import org.web3j.utils.Convert
@@ -38,68 +35,103 @@ class BalanceViewModel(private val web3j: Web3j) : ViewModel() {
     private val _mainList = MutableStateFlow<List<MainListItem>>(emptyList())
     val mainList = _mainList.asStateFlow()
 
-    private val _shouldRefresh = MutableStateFlow(
-        Progress(
-            shouldRefresh = true,
-            isFirstTimeLoading = true
-        )
-    )
+    private val _uiState = MutableStateFlow(UiState(isFirstTimeLoading = true))
+    val uiState = _uiState.asStateFlow()
 
-    private val _isLoading = MutableStateFlow(false)
-    val isLoading = _isLoading.asStateFlow()
-    private val _isRefreshing = MutableStateFlow(false)
-    val isRefreshing = _isRefreshing.asStateFlow()
+    private val compositeDisposable = CompositeDisposable()
 
     private var refreshJob: Job? = null
+    private var fetchJob: Job? = null
+
+    private val jobExceptionHandler = CoroutineExceptionHandler { _, throwable ->
+        throwable.message?.let(::setErrorMessage)
+        fetchJob?.start()
+    }
 
     init {
-        viewModelScope.launch {
-            _shouldRefresh.collectLatest {
-                if (it.shouldRefresh) refreshAll(it.isFirstTimeLoading)
-            }
-        }
-    }
-
-    private fun refreshAll(isFirstTimeLoading: Boolean) {
-        refreshJob?.cancel()
         refreshJob = viewModelScope.launch {
-            if (isFirstTimeLoading) {
-                _isLoading.update { true }
-            } else {
-                _isRefreshing.update { true }
+            while (true) {
+                setRefreshing()
+//                delay(5000) TODO: Handle refresh
             }
+        }
 
-            val ethBalanceDeferred = async { fetchEthBalance(ADDRESS) }
-            val tokenBalanceDeferred = async { fetchTokenBalance(ADDRESS, USDC_CONTRACT_ADDRESS) }
-            val ethBalance = ethBalanceDeferred.await()
-            val tokenBalance = tokenBalanceDeferred.await()
-
-            _mainList.update {
-                listOf<MainListItem>(
-                    ethBalance,
-                    tokenBalance
-                )
+        fetchJob = viewModelScope.launch(context = jobExceptionHandler) {
+            _uiState.collectLatest { state ->
+                if (state.isRefreshing) {
+                    fetchAll(this@launch)
+                    setLoaded()
+                }
             }
-            if (isFirstTimeLoading) {
-                _isLoading.update { false }
-            } else {
-                _isRefreshing.update { false }
-                setShouldRefresh(
-                    shouldRefresh = false,
-                    isFirstTimeLoading = false
+        }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        refreshJob?.cancel()
+        compositeDisposable.dispose()
+        web3j.shutdown()
+    }
+
+    private suspend fun fetchAll(coroutineScope: CoroutineScope) = with(coroutineScope) {
+        val ethBalanceDeferred = async { fetchEthBalance(ADDRESS) }
+        val tokenBalanceDeferred = async { fetchTokenBalance(ADDRESS, USDC_CONTRACT_ADDRESS) }
+        val ethBalance = ethBalanceDeferred.await()
+        val tokenBalance = tokenBalanceDeferred.await()
+        val incomingTransactions = fetchLastIncomingTransactions(ADDRESS, USDC_CONTRACT_ADDRESS)
+
+        _mainList.update {
+            mutableListOf<MainListItem>(
+                Separator(R.string.list_wallet_balance),
+                ethBalance,
+                tokenBalance,
+                Separator(R.string.list_token_transactions),
+            ).apply {
+                addAll(
+                    listOf(
+                        MainListItem.Transaction("23532"),
+                        MainListItem.Transaction("235532"),
+                        MainListItem.Transaction("325523"),
+                        MainListItem.Transaction("532")
+                    )
                 )
             }
         }
     }
 
-    fun setShouldRefresh(
-        shouldRefresh: Boolean,
-        isFirstTimeLoading: Boolean
-    ) {
-        _shouldRefresh.update {
+    fun shouldRefresh() {
+        setRefreshing()
+    }
+
+    private fun setRefreshing() {
+        _uiState.update {
             it.copy(
-                shouldRefresh = shouldRefresh,
-                isFirstTimeLoading = isFirstTimeLoading
+                isFirstTimeLoading = false,
+                isRefreshing = true,
+                isLoaded = false,
+                errorMessage = null
+            )
+        }
+    }
+
+    private fun setLoaded() {
+        _uiState.update {
+            it.copy(
+                isFirstTimeLoading = false,
+                isRefreshing = false,
+                isLoaded = true,
+                errorMessage = null
+            )
+        }
+    }
+
+    private fun setErrorMessage(errorMessage: String) {
+        _uiState.update {
+            it.copy(
+                isFirstTimeLoading = false,
+                isRefreshing = false,
+                isLoaded = false,
+                errorMessage = errorMessage
             )
         }
     }
@@ -132,10 +164,10 @@ class BalanceViewModel(private val web3j: Web3j) : ViewModel() {
         address: String,
         tokenAddress: String
     ): Balance = withContext(Dispatchers.IO) {
-        val contract = getTokenContract(
+        val contract = provideTokenContract(
             tokenAddress,
             web3j,
-            MainModule.getReadOnlyTransactionManager(web3j, address),
+            MainModule.provideReadOnlyTransactionManager(web3j, address),
         )
         val balance = contract.balanceOf(address).sendAsync()
         val formattedBalance = balance.await()
@@ -150,54 +182,81 @@ class BalanceViewModel(private val web3j: Web3j) : ViewModel() {
     }
 
     private suspend fun fetchLastIncomingTransactions(
-        address: String,
+        walletAddress: String,
         tokenAddress: String,
         count: Long = 50
     ) {
-        val contract = getTokenContract(
-            tokenAddress,
-            web3j,
-            MainModule.getReadOnlyTransactionManager(web3j, address),
+
+        //Get Block Counts
+        val blockCount = getWalletBlockCount(walletAddress, tokenAddress)
+//        val startBlockName: String =
+//            if (blockCount > count) {
+//                val startBlockIndex = blockCount - count
+//                val startBlock = getBlockName()
+//                ""
+//            } else {
+//                DefaultBlockParameterName.EARLIEST.value
+//            }
+
+        val transferEvent = Event("Transfer",
+            listOf<TypeReference<*>>(
+                object : TypeReference<Address>(true) {},
+                object : TypeReference<Address>(true) {},
+                object : TypeReference<Uint256>(false) {}
+            )
         )
         val filter = EthFilter(
             DefaultBlockParameterName.EARLIEST,
             DefaultBlockParameterName.LATEST,
             tokenAddress
         ).addOptionalTopics(
-            null, Address(address).value
+            null,
+            walletAddress,
+            tokenAddress
         )
 
-        val event = Event(
-            "Transfer",
-            listOf(
-                object: TypeReference<Address>() {},
-                object: TypeReference<Address>() {},
-                object: TypeReference<Uint>() {}
-            )
-        )
+//        val subscription = web3j.ethLogFlowable(filter)
+//            .subscribe
 
-//        Flowable.fromPublisher(contract.transferEventFlowable(filter))
-//            .take(count)
-//            .blockingIterable()
-//            .mapNotNull { event ->
-//                val values = EventValues
+//        val disposable = web3j
+//            .ethLogFlowable(filter)
+//            .subscribe(
+//                {
+//                    println(it.transactionHash)
+//                },
+//                {
+//                    it.message?.let(::setErrorMessage)
+//                }
+//            )
+//        val receipts = web3j.ethGetLogs(filter)
+//            .sendAsync()
+//            .await()
+//            .logs
+//            .take(50)
+//            .map { log ->
+//                println(log)
 //            }
     }
 
-    override fun onCleared() {
-        web3j.shutdown()
-        refreshJob?.cancel()
-        super.onCleared()
+    private suspend fun getWalletBlockCount(walletAddress: String, tokenAddress: String): Int {
+        val latestBlockNumber = web3j.ethBlockNumber()
+        return 0
     }
 
     companion object {
         val FACTORY: ViewModelProvider.Factory = viewModelFactory {
             initializer {
-                val web3j = MainModule.getWeb3Instance()
+                val web3j = MainModule.provideWeb3()
                 BalanceViewModel(web3j)
             }
         }
     }
 }
 
+data class UiState(
+    val isFirstTimeLoading: Boolean = true,
+    val isRefreshing: Boolean = false,
+    val isLoaded: Boolean = false,
+    val errorMessage: String? = null
+)
 

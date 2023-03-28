@@ -24,9 +24,8 @@
 
 	<style name="Theme.LinenAssignment.Text.Sub" parent="Theme.LinenAssignment">
 		<item name="android:textSize">@dimen/text_size_normal</item>
-		<item name="android:textStyle">bold</item>
 		<item name="android:textColor">@color/color_on_surface_variant</item>
-		<item name="android:textAllCaps">true</item>
+		<item name="android:textStyle">bold</item>
 	</style>
 
 	<style name="Theme.LinenAssignment.SwipeProgress" parent="Theme.LinenAssignment">
@@ -36,9 +35,14 @@
 		</item>
 	</style>
 
-	<style name="Theme.LinenAssignment.Transaction.Card" parent="Theme.LinenAssignment">
-		<item name="cardElevation">2dp</item>
+	<style name="Theme.LinenAssignment.List.Card" parent="Theme.LinenAssignment">
+		<item name="cardElevation">1dp</item>
 		<item name="strokeWidth">0dp</item>
+		<item name="contentPaddingBottom">@dimen/space_normal</item>
+		<item name="contentPaddingLeft">@dimen/space_normal</item>
+		<item name="contentPaddingRight">@dimen/space_normal</item>
+		<item name="contentPaddingTop">@dimen/space_normal</item>
+		<item name="cornerRadius">4dp</item>
 	</style>
 
 </resources>

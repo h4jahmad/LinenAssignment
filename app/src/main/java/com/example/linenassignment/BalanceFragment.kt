@@ -7,16 +7,10 @@ import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.linenassignment.databinding.FragmentBalanceBinding
 import com.example.linenassignment.list.MainListAdapter
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 
 class BalanceFragment : Fragment() {
 
@@ -47,36 +41,31 @@ class BalanceFragment : Fragment() {
             adapter = mainAdapter
         }
 
-        balanceSwipeRefresh.setOnRefreshListener {
-            viewModel.setShouldRefresh(
-                shouldRefresh = true,
-                isFirstTimeLoading = false
-            )
-        }
+        balanceSwipeRefresh.setOnRefreshListener(viewModel::shouldRefresh)
 
-        collectWithLifecycle(viewModel.isLoading, collector = ::handleProgress)
-        collectWithLifecycle(viewModel.isRefreshing) { isRefreshing ->
-            if (!isRefreshing)
-                balanceSwipeRefresh.isRefreshing = false
+        collectWithLifecycle(viewModel.uiState) { state ->
+            when {
+                state.isFirstTimeLoading -> showProgress()
+                state.isLoaded -> showList()
+                state.isRefreshing -> balanceSwipeRefresh.isRefreshing = false
+                state.errorMessage != null -> {
+                    root.showSnackbar(state.errorMessage)
+                    showList()
+                }
+            }
         }
         collectWithLifecycle(viewModel.mainList, collector = mainAdapter::submitList)
     }
 
-    private fun handleProgress(isLoading: Boolean) = with(binding) {
-        balanceList.isVisible = !isLoading
-        balanceProgress.isVisible = isLoading
+    private fun showProgress() = with(binding) {
+        balanceList.isVisible = false
+        balanceProgress.isVisible = true
     }
 
-    private inline fun <reified T> collectWithLifecycle(
-        flow: Flow<T>,
-        lifecycleState: Lifecycle.State = Lifecycle.State.STARTED,
-        crossinline collector: suspend (T) -> Unit,
-    ) {
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(lifecycleState) {
-                flow.collectLatest { collector(it) }
-            }
-        }
+    private fun showList() = with(binding) {
+        balanceList.isVisible = true
+        balanceProgress.isVisible = false
+        balanceSwipeRefresh.isRefreshing = false
     }
 
     override fun onDestroyView() {

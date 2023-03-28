@@ -73,7 +73,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${coroutines}")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:${coroutines}")
     /**
-     * In MavenCentral a list of vulnerabilities have been reported for these librarys'
+     * In MavenCentral a list of vulnerabilities have been reported for these libraries'
      * dependencies, but I couldn't find any better replacement.
      * https://mvnrepository.com/artifact/org.web3j/core/5.0.0
      * */

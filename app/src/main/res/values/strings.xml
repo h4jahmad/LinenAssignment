@@ -1,7 +1,7 @@
 <resources>
 	<string name="app_name">Linen Assignment</string>
 	<string name="balance_fragment_label">Balance</string>
-	<string name="all_asset_balance_label">%1$s BALANCE:</string>
+	<string name="all_asset_balance_label">%1$s</string>
 	<string name="all_refresh_label">Refresh</string>
 	<string name="list_wallet_balance">Wallet Balance</string>
 	<string name="list_token_transactions">Latest Transactions</string>
