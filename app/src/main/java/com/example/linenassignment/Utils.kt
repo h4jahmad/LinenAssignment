@@ -1,20 +1,17 @@
 package com.example.linenassignment
 
+import android.text.format.DateFormat
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.example.linenassignment.model.TransferEvent
 import com.google.android.material.snackbar.Snackbar
-import io.reactivex.Flowable
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
-import org.web3j.protocol.core.methods.response.Log
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.text.DecimalFormat
@@ -44,7 +41,12 @@ suspend fun <T> CompletableFuture<T>.await(): T = suspendCancellableCoroutine { 
 }
 
 fun BigDecimal.formatAmount(): String = DecimalFormat("#,##0.00").format(this)
+fun BigInteger.toFormattedAmount(): String = DecimalFormat("#,##0.#").format(this)
 fun BigInteger.toBigDecimal(): BigDecimal = BigDecimal(this)
+fun BigInteger.toFormattedDate(): String {
+    val longTimeStamp = this.divide(1000.toBigInteger()).toLong()
+    return DateFormat.format("yyyy-MM-dd HH:mm:ss", longTimeStamp).toString()
+}
 
 fun View.showSnackbar(message: String) {
     Snackbar.make(this, message, Snackbar.LENGTH_INDEFINITE).apply {
