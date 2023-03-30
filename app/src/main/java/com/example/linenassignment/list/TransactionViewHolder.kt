@@ -1,11 +1,9 @@
 package com.example.linenassignment.list
 
 import androidx.recyclerview.widget.RecyclerView
-import com.example.linenassignment.databinding.ItemMainListBalanceBinding
 import com.example.linenassignment.databinding.ItemMainListTransactionBinding
-import com.example.linenassignment.list.MainListItem.Balance
 import com.example.linenassignment.list.MainListItem.Transaction
-import java.util.*
+import com.example.linenassignment.toFormattedAmount
 
 /**
  * Instead of inheriting directly from `RecyclerView.ViewHolder`, I'd create a `BaseViewHolder`
@@ -14,6 +12,10 @@ import java.util.*
 class TransactionViewHolder(private val binding: ItemMainListTransactionBinding) :
     RecyclerView.ViewHolder(binding.root) {
     fun bind(item: Transaction): Unit = with(binding) {
-        tt.text = item.id
+        itemMainListTransactionDateTimeValue.text = item.formattedDateTime
+        itemMainListTransactionAmount.text = item.amount.toFormattedAmount()
+        itemMainListTransactionCurrency.text = item.currencyCode
+        itemMainListTransactionFromAddress.text = item.fromAddress
+        itemMainListTransactionHash.text = item.hash
     }
 }
