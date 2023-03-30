@@ -73,7 +73,7 @@ class MainListAdapter : ListAdapter<MainListItem, RecyclerView.ViewHolder>(
                     oldItem.currencyCode == newItem.currencyCode
                 }
                 oldItem is Transaction && newItem is Transaction -> {
-                    oldItem.id == newItem.id
+                    oldItem.hash == newItem.hash
                 }
                 else -> false
             }
