@@ -13,15 +13,21 @@ import java.math.BigInteger
 // I'd use a DI library(e.g. hilt or dagger) to build the dependencies.
 object MainModule {
 
+    private const val API_ENDPOINT = "v3/0b52a2d92c8e4c1fb5bc4c0edb5db520"
+
     private fun provideHttpClient(debuggable: Boolean) = OkHttpClient.Builder().apply {
         if (debuggable) {
             addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
         }
     }.build()
 
+    /**
+     * I believe using Socket is much better than HttpService due to being able to get newest data
+     * without repetition, but for the sake of this assignment, I'll continue using HttpService.
+     * */
     fun provideWeb3(debuggable: Boolean = true): Web3j = Web3j.build(
         HttpService(
-            BuildConfig.BASE_URL,
+            BuildConfig.BASE_URL + API_ENDPOINT,
             provideHttpClient(debuggable)
         )
     )

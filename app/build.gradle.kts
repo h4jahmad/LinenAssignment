@@ -29,10 +29,10 @@ android {
             // In a real world project, I'd create a `remote` or `common` module, and add
             // these endpoints configurations there. Instead of hardcoding, I'd also add the endpoint
             // to the `buildSrc` module.
-            buildConfigField("String", "BASE_URL", "\"https://rpc.ankr.com/eth/\"")
+            buildConfigField("String", "BASE_URL", "\"https://mainnet.infura.io/\"")
         }
         release {
-            buildConfigField("String", "BASE_URL", "\"https://rpc.ankr.com/eth/\"")
+            buildConfigField("String", "BASE_URL", "\"https://mainnet.infura.io/\"")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
