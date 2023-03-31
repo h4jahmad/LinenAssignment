@@ -1,5 +1,7 @@
 package com.example.linenassignment
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,6 +11,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.linenassignment.MainModule.ETHERSCAN_ENDPOINT
 import com.example.linenassignment.databinding.FragmentBalanceBinding
 import com.example.linenassignment.list.MainListAdapter
 
@@ -34,7 +37,9 @@ class BalanceFragment : Fragment() {
     }
 
     private fun FragmentBalanceBinding.initView() {
-        val mainAdapter = MainListAdapter()
+        val mainAdapter = MainListAdapter {
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(ETHERSCAN_ENDPOINT + it)))
+        }
         with(balanceList) {
             itemAnimator = DefaultItemAnimator()
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)

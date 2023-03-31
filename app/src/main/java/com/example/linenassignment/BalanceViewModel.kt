@@ -11,18 +11,18 @@ import com.example.linenassignment.list.MainListItem.Balance
 import com.example.linenassignment.list.MainListItem.Separator
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
-import org.web3j.abi.TypeReference
-import org.web3j.abi.datatypes.Address
-import org.web3j.abi.datatypes.Event
-import org.web3j.abi.datatypes.generated.Uint256
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.update
 import org.web3j.protocol.Web3j
-import org.web3j.protocol.core.DefaultBlockParameter
 import org.web3j.protocol.core.DefaultBlockParameterName
-import org.web3j.protocol.core.methods.request.EthFilter
 import org.web3j.utils.Convert
 
-class BalanceViewModel(private val web3j: Web3j) : ViewModel() {
+class BalanceViewModel(
+    private val web3j: Web3j,
+    private val etherscan: EtherscanApi,
+) : ViewModel() {
 
     /**
      * Instead of hardcoding, I'd have a `query` [kotlinx.coroutines.flow.StateFlow] and I'll update it from the UI. Then
@@ -45,6 +45,7 @@ class BalanceViewModel(private val web3j: Web3j) : ViewModel() {
 
     private val jobExceptionHandler = CoroutineExceptionHandler { _, throwable ->
         throwable.message?.let(::setErrorMessage)
+        throwable.printStackTrace()
         fetchJob?.start()
     }
 
@@ -52,7 +53,7 @@ class BalanceViewModel(private val web3j: Web3j) : ViewModel() {
         refreshJob = viewModelScope.launch {
             while (true) {
                 setRefreshing()
-//                delay(5000) TODO: Handle refresh
+                delay(5000)
             }
         }
 
@@ -64,6 +65,7 @@ class BalanceViewModel(private val web3j: Web3j) : ViewModel() {
                 }
             }
         }
+
     }
 
     override fun onCleared() {
@@ -78,23 +80,20 @@ class BalanceViewModel(private val web3j: Web3j) : ViewModel() {
         val tokenBalanceDeferred = async { fetchTokenBalance(ADDRESS, USDC_CONTRACT_ADDRESS) }
         val ethBalance = ethBalanceDeferred.await()
         val tokenBalance = tokenBalanceDeferred.await()
-        val incomingTransactions = fetchLastIncomingTransactions(ADDRESS, USDC_CONTRACT_ADDRESS)
+        val incomingTransactions = fetchLastIncomingTransactions(
+            walletAddress = ADDRESS,
+            tokenAddress = USDC_CONTRACT_ADDRESS,
+            tokenCode = USDC_CODE
+        )
 
         _mainList.update {
-            mutableListOf<MainListItem>(
+            mutableListOf(
                 Separator(R.string.list_wallet_balance),
                 ethBalance,
                 tokenBalance,
                 Separator(R.string.list_token_transactions),
             ).apply {
-                addAll(
-                    listOf(
-                        MainListItem.Transaction("23532"),
-                        MainListItem.Transaction("235532"),
-                        MainListItem.Transaction("325523"),
-                        MainListItem.Transaction("532")
-                    )
-                )
+                addAll(incomingTransactions)
             }
         }
     }
@@ -140,25 +139,27 @@ class BalanceViewModel(private val web3j: Web3j) : ViewModel() {
     /**
      * Instead of directly handling the business layer in a `ViewModel`, I'd facilitate the
      * Clean Architecture and used and combination of _Repository Layer + Clean Architecture_.
+     * Additionally, dispatchers should be injected instead of being hardcoded.
      * */
-    private suspend fun fetchEthBalance(address: String): Balance = withContext(Dispatchers.IO) {
-        val balanceResponse =
-            web3j.ethGetBalance(address, DefaultBlockParameterName.LATEST).sendAsync()
-        val balance = balanceResponse
-            .await()
-            .balance
-            .toBigDecimal()
-        val formattedBalance = Convert.fromWei(
-            balance,
-            Convert.Unit.ETHER
-        ).formatAmount()
+    private suspend fun fetchEthBalance(address: String): Balance =
+        withContext(Dispatchers.IO) {
+            val balanceResponse = web3j
+                .ethGetBalance(address, DefaultBlockParameterName.LATEST)
+                .send()
+            val balance = balanceResponse
+                .balance
+                .toBigDecimal()
+            val formattedBalance = Convert.fromWei(
+                balance,
+                Convert.Unit.ETHER
+            ).formatAmount()
 
-        Balance(
-            currencyName = ETH_NAME,
-            currencyCode = ETH_CODE,
-            value = formattedBalance
-        )
-    }
+            Balance(
+                currencyName = ETH_NAME,
+                currencyCode = ETH_CODE,
+                value = formattedBalance
+            )
+        }
 
     private suspend fun fetchTokenBalance(
         address: String,
@@ -169,8 +170,10 @@ class BalanceViewModel(private val web3j: Web3j) : ViewModel() {
             web3j,
             MainModule.provideReadOnlyTransactionManager(web3j, address),
         )
-        val balance = contract.balanceOf(address).sendAsync()
-        val formattedBalance = balance.await()
+        val balance = contract
+            .balanceOf(address)
+            .send()
+        val formattedBalance = balance
             .toBigDecimal()
             .formatAmount()
 
@@ -184,70 +187,37 @@ class BalanceViewModel(private val web3j: Web3j) : ViewModel() {
     private suspend fun fetchLastIncomingTransactions(
         walletAddress: String,
         tokenAddress: String,
-        count: Long = 50
-    ) {
-
-        //Get Block Counts
-        val blockCount = getWalletBlockCount(walletAddress, tokenAddress)
-//        val startBlockName: String =
-//            if (blockCount > count) {
-//                val startBlockIndex = blockCount - count
-//                val startBlock = getBlockName()
-//                ""
-//            } else {
-//                DefaultBlockParameterName.EARLIEST.value
-//            }
-
-        val transferEvent = Event("Transfer",
-            listOf<TypeReference<*>>(
-                object : TypeReference<Address>(true) {},
-                object : TypeReference<Address>(true) {},
-                object : TypeReference<Uint256>(false) {}
-            )
-        )
-        val filter = EthFilter(
-            DefaultBlockParameterName.EARLIEST,
-            DefaultBlockParameterName.LATEST,
-            tokenAddress
-        ).addOptionalTopics(
-            null,
+        tokenCode: String,
+        count: Int = 50
+    ): List<MainListItem.Transaction> = withContext(Dispatchers.IO) {
+        val transactions = etherscan.fetchTransaction(
             walletAddress,
-            tokenAddress
-        )
+            tokenAddress,
+            1,
+            count,
+            "DESC",
+            MainModule.API_KEY
+        ).result
+            .map { txn ->
+                MainListItem.Transaction(
+                    txn.hash,
+                    txn.from,
+                    subUnitToBase(txn.value),
+                    tokenCode,
+                    txn.timeStamp.toFormattedDate()
+                )
+            }
 
-//        val subscription = web3j.ethLogFlowable(filter)
-//            .subscribe
-
-//        val disposable = web3j
-//            .ethLogFlowable(filter)
-//            .subscribe(
-//                {
-//                    println(it.transactionHash)
-//                },
-//                {
-//                    it.message?.let(::setErrorMessage)
-//                }
-//            )
-//        val receipts = web3j.ethGetLogs(filter)
-//            .sendAsync()
-//            .await()
-//            .logs
-//            .take(50)
-//            .map { log ->
-//                println(log)
-//            }
-    }
-
-    private suspend fun getWalletBlockCount(walletAddress: String, tokenAddress: String): Int {
-        val latestBlockNumber = web3j.ethBlockNumber()
-        return 0
+        transactions
     }
 
     companion object {
         val FACTORY: ViewModelProvider.Factory = viewModelFactory {
             initializer {
-                val web3j = MainModule.provideWeb3()
-                BalanceViewModel(web3j)
+                BalanceViewModel(
+                    MainModule.provideWeb3(),
+                    MainModule.provideEtherscanApi()
+                )
             }
         }
     }

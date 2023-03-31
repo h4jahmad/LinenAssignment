@@ -72,13 +72,11 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${coroutines}")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:${coroutines}")
-    /**
-     * In MavenCentral a list of vulnerabilities have been reported for these libraries'
-     * dependencies, but I couldn't find any better replacement.
-     * https://mvnrepository.com/artifact/org.web3j/core/5.0.0
-     * */
+
     implementation("org.web3j:core:5.0.0")
     implementation("org.web3j:contracts:5.0.0")
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
 
     testImplementation("junit:junit:4.13.2")
     testImplementation("com.google.truth:truth:1.1.3")

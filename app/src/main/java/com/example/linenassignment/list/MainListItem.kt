@@ -1,7 +1,6 @@
 package com.example.linenassignment.list
 
 import androidx.annotation.StringRes
-import java.math.BigInteger
 
 /**
  * Instead of directly using the currency's name and its code, I'd use [java.util.Currency]
@@ -23,7 +22,7 @@ sealed interface MainListItem {
     data class Transaction(
         val hash: String,
         val fromAddress: String,
-        val amount: BigInteger,
+        val amount: String,
         val currencyCode: String,
         val formattedDateTime: String,
     ) : MainListItem

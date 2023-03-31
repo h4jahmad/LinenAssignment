@@ -12,13 +12,16 @@ import com.example.linenassignment.databinding.ItemMainListSeparatorBinding
 import com.example.linenassignment.databinding.ItemMainListTransactionBinding
 import com.example.linenassignment.list.MainListItem.*
 
+typealias OnItemClicked = (hash: String) -> Unit
+
 /**
- * It's better to create a BaseListAdapter to have some common functionalities so to avoid any
+ * I'd create a BaseListAdapter to have some common functionalities so to avoid any
  * unnecessary repetitions.
  * */
-class MainListAdapter : ListAdapter<MainListItem, RecyclerView.ViewHolder>(
-    AsyncDifferConfig.Builder(COMPARATOR).build()
-) {
+class MainListAdapter(private val onItemClicked: OnItemClicked) :
+    ListAdapter<MainListItem, RecyclerView.ViewHolder>(
+        AsyncDifferConfig.Builder(COMPARATOR).build()
+    ) {
 
     override fun onCreateViewHolder(
         parent: ViewGroup,
@@ -36,7 +39,8 @@ class MainListAdapter : ListAdapter<MainListItem, RecyclerView.ViewHolder>(
                 LayoutInflater.from(parent.context),
                 parent,
                 false
-            )
+            ),
+            onItemClicked
         )
         R.layout.item_main_list_separator -> SeparatorViewHolder(
             ItemMainListSeparatorBinding.inflate(

@@ -6,7 +6,7 @@
 	<string name="list_wallet_balance">Wallet Balance</string>
 	<string name="list_token_transactions">Latest Transactions</string>
 	<string name="all_string_title">DISMISS</string>
-	<string name="all_date_time_label">Sent on:</string>
+	<string name="all_date_time_label">On:</string>
 	<string name="all_from_label">From:</string>
 	<string name="all_transaction_label">Txn</string>
 </resources>

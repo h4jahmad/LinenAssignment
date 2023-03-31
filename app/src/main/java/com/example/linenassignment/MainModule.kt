@@ -8,12 +8,25 @@ import org.web3j.protocol.http.HttpService
 import org.web3j.tx.ReadonlyTransactionManager
 import org.web3j.tx.TransactionManager
 import org.web3j.tx.gas.StaticGasProvider
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import java.math.BigInteger
 
 // I'd use a DI library(e.g. hilt or dagger) to build the dependencies.
 object MainModule {
 
     private const val API_ENDPOINT = "v3/0b52a2d92c8e4c1fb5bc4c0edb5db520"
+    private const val ETHERSCAN_URL =
+        "https://api.etherscan.io/api/"
+    const val API_KEY = "77UGKRTQ12WHFPGPPA8NHQDRFJE1QV848W"
+    const val ETHERSCAN_ENDPOINT = "https://etherscan.io/tx/"
+    fun provideEtherscanApi(): EtherscanApi = Retrofit.Builder()
+        .baseUrl(ETHERSCAN_URL)
+        .client(provideHttpClient(true))
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+        .create(EtherscanApi::class.java)
+
 
     private fun provideHttpClient(debuggable: Boolean) = OkHttpClient.Builder().apply {
         if (debuggable) {
