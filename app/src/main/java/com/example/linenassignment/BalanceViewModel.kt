@@ -9,7 +9,6 @@ import com.example.linenassignment.MainModule.provideTokenContract
 import com.example.linenassignment.list.MainListItem
 import com.example.linenassignment.list.MainListItem.Balance
 import com.example.linenassignment.list.MainListItem.Separator
-import io.reactivex.disposables.CompositeDisposable
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -37,8 +36,6 @@ class BalanceViewModel(
 
     private val _uiState = MutableStateFlow(UiState(isFirstTimeLoading = true))
     val uiState = _uiState.asStateFlow()
-
-    private val compositeDisposable = CompositeDisposable()
 
     private var refreshJob: Job? = null
     private var fetchJob: Job? = null
@@ -71,7 +68,7 @@ class BalanceViewModel(
     override fun onCleared() {
         super.onCleared()
         refreshJob?.cancel()
-        compositeDisposable.dispose()
+        fetchJob?.cancel()
         web3j.shutdown()
     }
 
